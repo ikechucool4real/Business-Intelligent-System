@@ -1,0 +1,27 @@
+IP Count = 
+    VAR IPCount = 
+        CALCULATETABLE(
+            ADDCOLUMNS(
+                VALUES(OutFact1[IP]),
+                "Count", CALCULATE(COUNT(OutFact1[IP]))
+            ),
+            ALL(OutFact1)
+        )
+    VAR Top10IPs = 
+        TOPN(
+            10, 
+            IPCount, 
+            [Count], 
+            DESC
+        )
+    VAR Others = 
+        SUMX(
+            EXCEPT(IPCount, Top10IPs), 
+            [Count]
+        )
+    VAR Result = 
+        UNION(
+            Top10IPs, 
+            ROW("IP", "Others", "Count", Others)
+        )
+    RETURN Result
